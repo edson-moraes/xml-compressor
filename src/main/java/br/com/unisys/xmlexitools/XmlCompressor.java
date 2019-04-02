@@ -3,9 +3,21 @@ package br.com.unisys.xmlexitools;
 import com.siemens.ct.exi.core.CodingMode;
 import com.siemens.ct.exi.core.EXIFactory;
 import com.siemens.ct.exi.core.FidelityOptions;
+import com.siemens.ct.exi.core.exceptions.EXIException;
 import com.siemens.ct.exi.core.exceptions.UnsupportedOption;
 import com.siemens.ct.exi.core.helpers.DefaultEXIFactory;
+import com.siemens.ct.exi.main.api.sax.EXIResult;
+import com.siemens.ct.exi.main.api.sax.EXISource;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.xml.XMLConstants;
+import javax.xml.transform.*;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 import java.lang.reflect.Field;
 
 public class XmlCompressor {
@@ -96,16 +108,14 @@ public class XmlCompressor {
 	 *                                       prefixes.
 	 * @return A XMLCompressor instance
 	 */
-
-
-	public static XmlCompressor create(CodingMode codingMode,
-									   boolean preserveComments,
-									   boolean preserveProcessingInstructions,
-									   boolean preserveDTDAndEntityRef,
-									   boolean preservePrefixes,
-									   boolean preserveLexicalValues,
-									   boolean enableSelfContainedElements,
-									   boolean stricSchemaInterpretation) {
+	private static XmlCompressor create(CodingMode codingMode,
+										boolean preserveComments,
+										boolean preserveProcessingInstructions,
+										boolean preserveDTDAndEntityRef,
+										boolean preservePrefixes,
+										boolean preserveLexicalValues,
+										boolean enableSelfContainedElements,
+										boolean stricSchemaInterpretation) {
 
 		FidelityOptions fidelityOptions;
 		try {
@@ -135,6 +145,28 @@ public class XmlCompressor {
 		return new XmlCompressor(codingMode, fidelityOptions);
 	}
 
+	public static XmlCompressor getMaxCompressionInstance() {
+		return create(CodingMode.COMPRESSION,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				true);
+	}
+
+	public static XmlCompressor getMaxFidelityInstance(){
+		return create(CodingMode.BIT_PACKED,
+				true,
+				true,
+				true,
+				true,
+				true,
+				true,
+				false);
+	}
+
 	private XmlCompressor() {
 		this.codingMode = CodingMode.BIT_PACKED;
 		this.fidelityOptions = FidelityOptions.createAll();
@@ -145,17 +177,65 @@ public class XmlCompressor {
 		this.fidelityOptions = fidelityOptions;
 	}
 
-	public String decodeFromString() {
-		return null;
+	private String encodeFromStream2(InputStream inputStream) throws EXIException, IOException, SAXException {
+		OutputStream exiOutputStream = new ByteArrayOutputStream();
+		InputSource inputSource = new InputSource(inputStream);
+		EXIResult exiResult = new EXIResult(exiFactory);
+		exiResult.setOutputStream(exiOutputStream);
+		XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+		xmlReader.setContentHandler(exiResult.getHandler());
+		xmlReader.parse(inputSource); // parse XML input
+		return exiOutputStream.toString();
 	}
 
-	public String decodeFromStream() {
-		return null;
+	private String decodeFromStream2(InputStream inputStream, StreamResult result) throws EXIException, TransformerException {
+		InputSource is = new InputSource(inputStream);
+		SAXSource exiSource = new EXISource(exiFactory);
+		exiSource.setInputSource(is);
+		TransformerFactory tf = TransformerFactory.newInstance();
+		tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		Transformer transformer = tf.newTransformer();
+		transformer.transform(exiSource, result);
+		return result.getOutputStream().toString();
 	}
 
-	public String decodeFromFile(){
-		return null;
+	public String encodeFromString(String inputString) throws IOException, EXIException, SAXException {
+		return encodeFromStream2(new ByteArrayInputStream(inputString.getBytes())).toString();
 	}
 
+	public String decodeFromString(String inputString) throws EXIException, TransformerException {
+		StreamResult result = new StreamResult(new ByteArrayOutputStream());
+		decodeFromStream2(new ByteArrayInputStream(inputString.getBytes()), result);
+		return result.getOutputStream().toString();
+	}
 
+	public String encodeFromStream(InputStream inputStream) throws EXIException, IOException, SAXException {
+		return encodeFromStream2(inputStream).toString();
+	}
+
+	public String decodeFromStream(InputStream inputStream) throws EXIException, TransformerException {
+		StreamResult result = new StreamResult(new ByteArrayOutputStream());
+		decodeFromStream2(inputStream, result);
+		return result.getOutputStream().toString();
+	}
+
+	public String encodeFromFile(String filePath) throws IOException, EXIException, SAXException {
+		return encodeFromStream2(new FileInputStream(filePath)).toString();
+	}
+
+	public String encodeFromFile(File file) throws IOException, EXIException, SAXException {
+		return encodeFromStream2(new FileInputStream(file)).toString();
+	}
+
+	public String decodeFromFile(String filePath) throws FileNotFoundException, TransformerException, EXIException {
+		FileInputStream fileInputStream = new FileInputStream(filePath);
+		StreamResult result = new StreamResult(new ByteArrayOutputStream());
+		return decodeFromStream2(fileInputStream, result);
+	}
+
+	public String decodeFromFile(File file) throws FileNotFoundException, TransformerException, EXIException {
+		FileInputStream fileInputStream = new FileInputStream(file);
+		StreamResult result = new StreamResult(new ByteArrayOutputStream());
+		return decodeFromStream2(fileInputStream, result);
+	}
 }

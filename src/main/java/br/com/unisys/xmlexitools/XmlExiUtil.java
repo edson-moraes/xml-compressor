@@ -69,14 +69,14 @@ public class XmlExiUtil {
              */
             String fileXML = "src/main/resources/input-decompressed.xml"; // XML output again
             Result result = new StreamResult(fileXML);
-            InputSource is = new InputSource(fileEXI);
-            SAXSource exiSource = new EXISource(exiFactory);
-            exiSource.setInputSource(is);
-            TransformerFactory tf = TransformerFactory.newInstance();
-            tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            Transformer transformer = tf.newTransformer();
-            transformer.transform(exiSource, result);
-        } catch (TransformerException | EXIException | SAXException | IOException e) {
+//            InputSource is = new InputSource(fileEXI);
+//            SAXSource exiSource = new EXISource(exiFactory);
+//            exiSource.setInputSource(is);
+//            TransformerFactory tf = TransformerFactory.newInstance();
+//            tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+//            Transformer transformer = tf.newTransformer();
+//            transformer.transform(exiSource, result);
+        } catch (EXIException | SAXException | IOException e) {
             e.printStackTrace();
         }
 
