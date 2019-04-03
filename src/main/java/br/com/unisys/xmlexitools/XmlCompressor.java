@@ -251,8 +251,7 @@ public class XmlCompressor {
         XmlCompressor maxFidelityInstance = XmlCompressor.getMaxFidelityInstance();
 
         try {
-            float compressionRatio = 1.0f;
-            float spaceSavings = 1;
+            float compressionRatio, spaceSavings;
             byte[] fileData = Files.readAllBytes(Paths.get(filePath));
             int unencodedSize = fileData.length;
             System.out.println("Unencoded file size: " + unencodedSize + " bytes\n");
