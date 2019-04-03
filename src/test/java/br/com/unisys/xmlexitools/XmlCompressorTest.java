@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class XmlCompressorTest {
 
     private final int UNENCODED_SIZE = 55219;
-    private final int MAX_COMPRESSION_ENCODED_SIZE = 14311;
+    private final int MAX_COMPRESSION_ENCODED_SIZE = 6639;
     private final int MAX_COMPRESSION_DECODED_SIZE = 1;
-    private final int MAX_FIDELITY_ENCODED_SIZE = 14311;
+    private final int MAX_FIDELITY_ENCODED_SIZE = 14074;
     private final int MAX_FIDELITY_DECODED_SIZE = 1;
 
     private static File testXmlFile;
