@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -124,6 +125,7 @@ class XmlCompressorTest {
 			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | TransformerException e) {
 			e.printStackTrace();
+			fail();
 		}
 
 	}
@@ -141,7 +143,6 @@ class XmlCompressorTest {
 			assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
 		} catch (EXIException | IOException | SAXException e) {
 			e.printStackTrace();
-
 		}
 
 	}
@@ -157,7 +158,7 @@ class XmlCompressorTest {
 			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | TransformerException e) {
 			e.printStackTrace();
-
+			fail();
 		}
 
 	}
@@ -203,6 +204,7 @@ class XmlCompressorTest {
 			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | IOException | TransformerException e) {
 			e.printStackTrace();
+			fail();
 		}
 
 	}
@@ -218,6 +220,7 @@ class XmlCompressorTest {
 			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | IOException | TransformerException e) {
 			e.printStackTrace();
+			fail();
 		}
 	}
 }
