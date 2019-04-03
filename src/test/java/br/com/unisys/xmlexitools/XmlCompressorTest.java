@@ -9,17 +9,15 @@ import javax.xml.transform.TransformerException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Edson Moraes - Edson.MoraesJunior@unisys.com
  */
-public class XmlCompressorTest {
+class XmlCompressorTest {
 
 	private static int UNENCODED_SIZE;
 	private static int MAX_COMPRESSION_ENCODED_SIZE;
@@ -102,123 +100,124 @@ public class XmlCompressorTest {
 
 	@Test
 	void encodeFromString() {
-		byte[] maxFidelityEncodeOutput = new byte[0];
-		byte[] maxCompressionEncodeOutput = new byte[0];
+		byte[] maxFidelityEncodeOutput;
+		byte[] maxCompressionEncodeOutput;
 		try {
 			maxFidelityEncodeOutput = maxFidelityInstance.encodeFromString(testUnencodedXml);
 			maxCompressionEncodeOutput = maxCompressionInstance.encodeFromString(testUnencodedXml);
+			assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
+			assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
 		} catch (EXIException | IOException | SAXException e) {
 			e.printStackTrace();
-			fail();
 		}
-		assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
-		assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
+
 	}
 
 	@Test
 	void decodeFromString() {
-		String maxFidelityDecodeOutput = "";
-		String maxCompressionDecodeOutput = "";
+		String maxFidelityDecodeOutput;
+		String maxCompressionDecodeOutput;
 		try {
 			maxFidelityDecodeOutput = decodeInstance.decodeFromString(testEncodedMaxFidelityXml);
 			maxCompressionDecodeOutput = decodeInstance.decodeFromString(testEncodedMaxCompressionXml);
+			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
+			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | TransformerException e) {
 			e.printStackTrace();
-			fail();
 		}
-		assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
-		assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
+
 	}
 
 	@Test
 	void encodeFromStream() {
-		byte[] maxFidelityEncodeOutput = new byte[0];
-		byte[] maxCompressionEncodeOutput = new byte[0];
+		byte[] maxFidelityEncodeOutput;
+		byte[] maxCompressionEncodeOutput;
 
 		try {
 			maxFidelityEncodeOutput = maxFidelityInstance.encodeFromStream(testUnencodedXmlInputStream);
 			testUnencodedXmlInputStream.reset();
 			maxCompressionEncodeOutput = maxCompressionInstance.encodeFromStream(testUnencodedXmlInputStream);
+			assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
+			assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
 		} catch (EXIException | IOException | SAXException e) {
 			e.printStackTrace();
-			fail();
+
 		}
-		assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
-		assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
+
 	}
 
 	@Test
 	void decodeFromStream() {
-		String maxFidelityDecodeOutput = "";
-		String maxCompressionDecodeOutput = "";
+		String maxFidelityDecodeOutput;
+		String maxCompressionDecodeOutput;
 		try {
 			maxFidelityDecodeOutput = decodeInstance.decodeFromStream(testEncodedMaxFidelityInputStream);
 			maxCompressionDecodeOutput = decodeInstance.decodeFromStream(testEncodedMaxCompressionInputStream);
+			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
+			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | TransformerException e) {
 			e.printStackTrace();
-			fail();
+
 		}
-		assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
-		assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
+
 	}
 
 	@Test
 	void encodeFromFile() {
-		byte[] maxFidelityEncodeOutput = new byte[0];
-		byte[] maxCompressionEncodeOutput = new byte[0];
+		byte[] maxFidelityEncodeOutput;
+		byte[] maxCompressionEncodeOutput;
 		try {
 			maxFidelityEncodeOutput = maxFidelityInstance.encodeFromFile(testUnencodeXmlFile);
 			maxCompressionEncodeOutput = maxCompressionInstance.encodeFromFile(testUnencodeXmlFile);
+			assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
+			assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
 		} catch (EXIException | IOException | SAXException e) {
 			e.printStackTrace();
-			fail();
 		}
-		assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
-		assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
+
 	}
 
 	@Test
 	void encodeFromFile1() {
-		byte[] maxFidelityEncodeOutput = new byte[0];
-		byte[] maxCompressionEncodeOutput = new byte[0];
+		byte[] maxFidelityEncodeOutput;
+		byte[] maxCompressionEncodeOutput;
 		try {
 			maxFidelityEncodeOutput = maxFidelityInstance.encodeFromFile(testUnencodedXmlFilePath);
 			maxCompressionEncodeOutput = maxCompressionInstance.encodeFromFile(testUnencodedXmlFilePath);
+			assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
+			assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
 		} catch (EXIException | IOException | SAXException e) {
 			e.printStackTrace();
-			fail();
 		}
-		assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
-		assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
+
 	}
 
 	@Test
 	void decodeFromFile() {
-		String maxFidelityDecodeOutput = "";
-		String maxCompressionDecodeOutput = "";
+		String maxFidelityDecodeOutput;
+		String maxCompressionDecodeOutput;
 		try {
 			maxFidelityDecodeOutput = decodeInstance.decodeFromFile(testEncodedMaxFidelityXmlFilePath);
 			maxCompressionDecodeOutput = decodeInstance.decodeFromFile(testEncodedMaxCompressionXmlFilePath);
+			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
+			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | IOException | TransformerException e) {
 			e.printStackTrace();
-			fail();
 		}
-		assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
-		assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
+
 	}
 
 	@Test
 	void decodeFromFile1() {
-		String maxFidelityDecodeOutput = "";
-		String maxCompressionDecodeOutput = "";
+		String maxFidelityDecodeOutput;
+		String maxCompressionDecodeOutput;
 		try {
 			maxFidelityDecodeOutput = decodeInstance.decodeFromFile(testEncodedMaxFidelittyXmlFile);
 			maxCompressionDecodeOutput = decodeInstance.decodeFromFile(testEncodedMaxCompressionXmlFile);
+			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
+			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | IOException | TransformerException e) {
 			e.printStackTrace();
-			fail();
 		}
-		assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
-		assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 	}
 }
