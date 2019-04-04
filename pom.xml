@@ -7,6 +7,31 @@
 	<groupId>br.com.unisys</groupId>
 	<artifactId>xml-compressor</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<organization>
+		<name>Unisys Brasil LTDA</name>
+		<url>https://www.unisys.com.br/</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<name>Edson Francisco de Moraes Júnior</name>
+			<email>Edson.MoraesJunior@unisys.com</email>
+			<organization>Unisys Brasil LTDA</organization>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -27,18 +52,6 @@
 			<version>1.0.1</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>RELEASE</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>RELEASE</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>

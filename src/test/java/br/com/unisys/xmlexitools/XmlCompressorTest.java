@@ -1,6 +1,8 @@
 package br.com.unisys.xmlexitools;
 
+import com.siemens.ct.exi.core.CodingMode;
 import com.siemens.ct.exi.core.exceptions.EXIException;
+import com.siemens.ct.exi.core.exceptions.UnsupportedOption;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
@@ -45,9 +47,9 @@ class XmlCompressorTest {
 	private static ByteArrayInputStream testDecodedXmlMaxCompressionInputStream;
 
 	private static String testUnencodedXml;
-	private static String testEncodedMaxFidelityXml;
+	private static byte[] testEncodedMaxFidelityXml;
 	private static String testDecodedMaxFidelityXml;
-	private static String testEncodedMaxCompressionXml;
+	private static byte[] testEncodedMaxCompressionXml;
 	private static String testDecodedMaxCompressionXml;
 
 	private static XmlCompressor maxCompressionInstance;
@@ -56,7 +58,7 @@ class XmlCompressorTest {
 
 
 	@BeforeAll
-	static void setUp() throws IOException {
+	static void setUp() throws IOException, UnsupportedOption {
 
 		maxCompressionInstance = XmlCompressor.getMaxCompressionInstance();
 		maxFidelityInstance = XmlCompressor.getMaxFidelityInstance();
@@ -81,9 +83,9 @@ class XmlCompressorTest {
 		byte[] testDecodedMaxCompressionXmlData = Files.readAllBytes(Paths.get(testDecodedMaxCompressionXmlFilePath));
 
 		testUnencodedXml = new String(testUnencodedXmlData);
-		testEncodedMaxFidelityXml = new String(testEncodedMaxFidelityXmlData);
+		testEncodedMaxFidelityXml = testEncodedMaxFidelityXmlData;
 		testDecodedMaxFidelityXml = new String(testDecodedMaxFidelityXmlData);
-		testEncodedMaxCompressionXml = new String(testEncodedMaxCompressionXmlData);
+		testEncodedMaxCompressionXml = testEncodedMaxCompressionXmlData;
 		testDecodedMaxCompressionXml = new String(testDecodedMaxCompressionXmlData);
 
 		testUnencodedXmlInputStream = new ByteArrayInputStream(testUnencodedXmlData);
@@ -111,7 +113,6 @@ class XmlCompressorTest {
 		} catch (EXIException | IOException | SAXException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Test
@@ -119,15 +120,14 @@ class XmlCompressorTest {
 		String maxFidelityDecodeOutput;
 		String maxCompressionDecodeOutput;
 		try {
-			maxFidelityDecodeOutput = decodeInstance.decodeFromString(testEncodedMaxFidelityXml);
-			maxCompressionDecodeOutput = decodeInstance.decodeFromString(testEncodedMaxCompressionXml);
+			maxFidelityDecodeOutput = maxFidelityInstance.decodeFromByteArray(testEncodedMaxFidelityXml);
+			maxCompressionDecodeOutput = maxCompressionInstance.decodeFromByteArray(testEncodedMaxCompressionXml);
 			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
 			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | TransformerException e) {
 			e.printStackTrace();
 			fail();
 		}
-
 	}
 
 	@Test
@@ -144,7 +144,6 @@ class XmlCompressorTest {
 		} catch (EXIException | IOException | SAXException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Test
@@ -152,15 +151,28 @@ class XmlCompressorTest {
 		String maxFidelityDecodeOutput;
 		String maxCompressionDecodeOutput;
 		try {
-			maxFidelityDecodeOutput = decodeInstance.decodeFromStream(testEncodedMaxFidelityInputStream);
-			maxCompressionDecodeOutput = decodeInstance.decodeFromStream(testEncodedMaxCompressionInputStream);
+			maxFidelityDecodeOutput = maxFidelityInstance.decodeFromStream(testEncodedMaxFidelityInputStream);
+			maxCompressionDecodeOutput = maxCompressionInstance.decodeFromStream(testEncodedMaxCompressionInputStream);
 			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
 			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | TransformerException e) {
 			e.printStackTrace();
 			fail();
 		}
+	}
 
+	@Test
+	void encodeFromFilePath() {
+		byte[] maxFidelityEncodeOutput;
+		byte[] maxCompressionEncodeOutput;
+		try {
+			maxFidelityEncodeOutput = maxFidelityInstance.encodeFromFile(testUnencodedXmlFilePath);
+			maxCompressionEncodeOutput = maxCompressionInstance.encodeFromFile(testUnencodedXmlFilePath);
+			assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
+			assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
+		} catch (EXIException | IOException | SAXException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Test
@@ -175,22 +187,21 @@ class XmlCompressorTest {
 		} catch (EXIException | IOException | SAXException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Test
-	void encodeFromFile1() {
-		byte[] maxFidelityEncodeOutput;
-		byte[] maxCompressionEncodeOutput;
+	void decodeFromFilePath() {
+		String maxFidelityDecodeOutput;
+		String maxCompressionDecodeOutput;
 		try {
-			maxFidelityEncodeOutput = maxFidelityInstance.encodeFromFile(testUnencodedXmlFilePath);
-			maxCompressionEncodeOutput = maxCompressionInstance.encodeFromFile(testUnencodedXmlFilePath);
-			assertEquals(MAX_FIDELITY_ENCODED_SIZE, maxFidelityEncodeOutput.length);
-			assertEquals(MAX_COMPRESSION_ENCODED_SIZE, maxCompressionEncodeOutput.length);
-		} catch (EXIException | IOException | SAXException e) {
+			maxFidelityDecodeOutput = maxFidelityInstance.decodeFromFile(testEncodedMaxFidelityXmlFilePath);
+			maxCompressionDecodeOutput = maxCompressionInstance.decodeFromFile(testEncodedMaxCompressionXmlFilePath);
+			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
+			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
+		} catch (EXIException | IOException | TransformerException e) {
 			e.printStackTrace();
+			fail();
 		}
-
 	}
 
 	@Test
@@ -198,29 +209,25 @@ class XmlCompressorTest {
 		String maxFidelityDecodeOutput;
 		String maxCompressionDecodeOutput;
 		try {
-			maxFidelityDecodeOutput = decodeInstance.decodeFromFile(testEncodedMaxFidelityXmlFilePath);
-			maxCompressionDecodeOutput = decodeInstance.decodeFromFile(testEncodedMaxCompressionXmlFilePath);
+			maxFidelityDecodeOutput = maxFidelityInstance.decodeFromFile(testEncodedMaxFidelittyXmlFile);
+			maxCompressionDecodeOutput = maxCompressionInstance.decodeFromFile(testEncodedMaxCompressionXmlFile);
 			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
 			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
 		} catch (EXIException | IOException | TransformerException e) {
 			e.printStackTrace();
 			fail();
 		}
-
 	}
 
 	@Test
-	void decodeFromFile1() {
-		String maxFidelityDecodeOutput;
-		String maxCompressionDecodeOutput;
-		try {
-			maxFidelityDecodeOutput = decodeInstance.decodeFromFile(testEncodedMaxFidelittyXmlFile);
-			maxCompressionDecodeOutput = decodeInstance.decodeFromFile(testEncodedMaxCompressionXmlFile);
-			assertEquals(MAX_FIDELITY_DECODED_SIZE, maxFidelityDecodeOutput.getBytes().length);
-			assertEquals(MAX_COMPRESSION_DECODED_SIZE, maxCompressionDecodeOutput.getBytes().length);
-		} catch (EXIException | IOException | TransformerException e) {
-			e.printStackTrace();
-			fail();
-		}
+	void createStrict() throws UnsupportedOption {
+		XmlCompressor.create(CodingMode.BIT_PACKED,
+				true,
+				true,
+				true,
+				true,
+				true,
+				true,
+				true);
 	}
 }

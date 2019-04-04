@@ -110,44 +110,42 @@ public class XmlCompressor {
 	 *                                       prefixes.
 	 * @return A XMLCompressor instance
 	 */
-	private static XmlCompressor create(CodingMode codingMode,
+	public static XmlCompressor create(CodingMode codingMode,
 										boolean preserveComments,
 										boolean preserveProcessingInstructions,
 										boolean preserveDTDAndEntityRef,
 										boolean preservePrefixes,
 										boolean preserveLexicalValues,
 										boolean enableSelfContainedElements,
-										boolean stricSchemaInterpretation) {
+										boolean stricSchemaInterpretation) throws UnsupportedOption {
 
 		FidelityOptions fidelityOptions;
-		try {
-			if (stricSchemaInterpretation) {
-				fidelityOptions = FidelityOptions.createStrict();
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_LEXICAL_VALUE, preserveLexicalValues);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_COMMENT, false);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_DTD, false);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_PI, false);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_PREFIX, false);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_SC, false);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_STRICT, true);
-			} else {
-				fidelityOptions = FidelityOptions.createStrict();
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_COMMENT, preserveComments);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_PI, preserveProcessingInstructions);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_DTD, preserveDTDAndEntityRef);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_PREFIX, preservePrefixes);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_LEXICAL_VALUE, preserveLexicalValues);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_SC, enableSelfContainedElements);
-				fidelityOptions.setFidelity(FidelityOptions.FEATURE_STRICT, false);
-			}
-		} catch (UnsupportedOption unsupportedOption) {
-			return new XmlCompressor();
+
+		if (stricSchemaInterpretation) {
+			fidelityOptions = FidelityOptions.createStrict();
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_LEXICAL_VALUE, preserveLexicalValues);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_COMMENT, false);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_DTD, false);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_PI, false);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_PREFIX, false);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_SC, false);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_STRICT, true);
+		} else {
+			fidelityOptions = FidelityOptions.createStrict();
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_COMMENT, preserveComments);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_PI, preserveProcessingInstructions);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_DTD, preserveDTDAndEntityRef);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_PREFIX, preservePrefixes);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_LEXICAL_VALUE, preserveLexicalValues);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_SC, enableSelfContainedElements);
+			fidelityOptions.setFidelity(FidelityOptions.FEATURE_STRICT, false);
 		}
+
 
 		return new XmlCompressor(codingMode, fidelityOptions);
 	}
 
-	public static XmlCompressor getMaxCompressionInstance() {
+	public static XmlCompressor getMaxCompressionInstance() throws UnsupportedOption {
 		return create(CodingMode.COMPRESSION,
 				false,
 				false,
@@ -158,7 +156,7 @@ public class XmlCompressor {
 				false);
 	}
 
-	public static XmlCompressor getMaxFidelityInstance() {
+	public static XmlCompressor getMaxFidelityInstance() throws UnsupportedOption {
 		return create(CodingMode.BIT_PACKED,
 				true,
 				true,
@@ -167,13 +165,6 @@ public class XmlCompressor {
 				true,
 				true,
 				false);
-	}
-
-	private XmlCompressor() {
-		this.codingMode = CodingMode.BIT_PACKED;
-		this.fidelityOptions = FidelityOptions.createAll();
-		exiFactory.setCodingMode(codingMode);
-		exiFactory.setFidelityOptions(fidelityOptions);
 	}
 
 	private XmlCompressor(CodingMode codingMode, FidelityOptions fidelityOptions) {
@@ -209,9 +200,9 @@ public class XmlCompressor {
 		return encodeFromStream2(new ByteArrayInputStream(inputString.getBytes()));
 	}
 
-	public String decodeFromString(String inputString) throws EXIException, TransformerException {
+	public String decodeFromByteArray(byte[] inputByteArray) throws EXIException, TransformerException {
 		StreamResult result = new StreamResult(new ByteArrayOutputStream());
-		decodeFromStream2(new ByteArrayInputStream(inputString.getBytes()), result);
+		decodeFromStream2(new ByteArrayInputStream(inputByteArray), result);
 		return result.getOutputStream().toString();
 	}
 
@@ -245,32 +236,32 @@ public class XmlCompressor {
 		return decodeFromStream2(fileInputStream, result);
 	}
 
-	public static void main(String[] args) {
-		String filePath = "src/main/resources/input.xml";
-		XmlCompressor maxCompressionInstance = XmlCompressor.getMaxCompressionInstance();
-		XmlCompressor maxFidelityInstance = XmlCompressor.getMaxFidelityInstance();
-
-		try {
-			float compressionRatio, spaceSavings;
-			byte[] fileData = Files.readAllBytes(Paths.get(filePath));
-			int unencodedSize = fileData.length;
-			System.out.println("Unencoded file size: " + unencodedSize + " bytes\n");
-
-			byte[] maxCompressionResult = maxCompressionInstance.encodeFromFile(filePath);
-			int maxCompressionSize = maxCompressionResult.length;
-			compressionRatio = (float) unencodedSize / (float) maxCompressionSize;
-			spaceSavings = (1.0f - ((float) maxCompressionSize / (float) unencodedSize)) * 100.0f;
-			System.out.printf("Max. Fidelity file size: %d bytes\nCompression Ratio: %f\nSpace Savings: %f%%\n\n", maxCompressionSize, compressionRatio, spaceSavings);
-
-
-			byte[] maxFidelityResult = maxFidelityInstance.encodeFromFile(filePath);
-			int maxFidelitySize = maxFidelityResult.length;
-			compressionRatio = (float) unencodedSize / (float) maxFidelitySize;
-			spaceSavings = (1 - ((float) maxFidelitySize / (float) unencodedSize)) * 100.0f;
-			System.out.printf("Max. Fidelity file size: %d bytes\nCompression Ratio: %f\nSpace Savings: %f%%\n\n", maxFidelitySize, compressionRatio, spaceSavings);
-
-		} catch (IOException | EXIException | SAXException e) {
-			e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args) {
+//		String filePath = "src/main/resources/input.xml";
+//		XmlCompressor maxCompressionInstance = XmlCompressor.getMaxCompressionInstance();
+//		XmlCompressor maxFidelityInstance = XmlCompressor.getMaxFidelityInstance();
+//
+//		try {
+//			float compressionRatio, spaceSavings;
+//			byte[] fileData = Files.readAllBytes(Paths.get(filePath));
+//			int unencodedSize = fileData.length;
+//			System.out.println("Unencoded file size: " + unencodedSize + " bytes\n");
+//
+//			byte[] maxCompressionResult = maxCompressionInstance.encodeFromFile(filePath);
+//			int maxCompressionSize = maxCompressionResult.length;
+//			compressionRatio = (float) unencodedSize / (float) maxCompressionSize;
+//			spaceSavings = (1.0f - ((float) maxCompressionSize / (float) unencodedSize)) * 100.0f;
+//			System.out.printf("Max. Fidelity file size: %d bytes\nCompression Ratio: %f\nSpace Savings: %f%%\n\n", maxCompressionSize, compressionRatio, spaceSavings);
+//
+//
+//			byte[] maxFidelityResult = maxFidelityInstance.encodeFromFile(filePath);
+//			int maxFidelitySize = maxFidelityResult.length;
+//			compressionRatio = (float) unencodedSize / (float) maxFidelitySize;
+//			spaceSavings = (1 - ((float) maxFidelitySize / (float) unencodedSize)) * 100.0f;
+//			System.out.printf("Max. Fidelity file size: %d bytes\nCompression Ratio: %f\nSpace Savings: %f%%\n\n", maxFidelitySize, compressionRatio, spaceSavings);
+//
+//		} catch (IOException | EXIException | SAXException e) {
+//			e.printStackTrace();
+//		}
+//	}
 }
