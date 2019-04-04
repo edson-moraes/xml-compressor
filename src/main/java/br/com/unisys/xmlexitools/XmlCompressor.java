@@ -8,19 +8,22 @@ import com.siemens.ct.exi.core.exceptions.UnsupportedOption;
 import com.siemens.ct.exi.core.helpers.DefaultEXIFactory;
 import com.siemens.ct.exi.main.api.sax.EXIResult;
 import com.siemens.ct.exi.main.api.sax.EXISource;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.XMLConstants;
-import javax.xml.transform.*;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class XmlCompressor {
 
@@ -111,13 +114,13 @@ public class XmlCompressor {
 	 * @return A XMLCompressor instance
 	 */
 	public static XmlCompressor create(CodingMode codingMode,
-										boolean preserveComments,
-										boolean preserveProcessingInstructions,
-										boolean preserveDTDAndEntityRef,
-										boolean preservePrefixes,
-										boolean preserveLexicalValues,
-										boolean enableSelfContainedElements,
-										boolean stricSchemaInterpretation) throws UnsupportedOption {
+									   boolean preserveComments,
+									   boolean preserveProcessingInstructions,
+									   boolean preserveDTDAndEntityRef,
+									   boolean preservePrefixes,
+									   boolean preserveLexicalValues,
+									   boolean enableSelfContainedElements,
+									   boolean stricSchemaInterpretation) throws UnsupportedOption {
 
 		FidelityOptions fidelityOptions;
 
@@ -236,32 +239,37 @@ public class XmlCompressor {
 		return decodeFromStream2(fileInputStream, result);
 	}
 
-//	public static void main(String[] args) {
-//		String filePath = "src/main/resources/input.xml";
-//		XmlCompressor maxCompressionInstance = XmlCompressor.getMaxCompressionInstance();
-//		XmlCompressor maxFidelityInstance = XmlCompressor.getMaxFidelityInstance();
-//
-//		try {
-//			float compressionRatio, spaceSavings;
-//			byte[] fileData = Files.readAllBytes(Paths.get(filePath));
-//			int unencodedSize = fileData.length;
-//			System.out.println("Unencoded file size: " + unencodedSize + " bytes\n");
-//
-//			byte[] maxCompressionResult = maxCompressionInstance.encodeFromFile(filePath);
-//			int maxCompressionSize = maxCompressionResult.length;
-//			compressionRatio = (float) unencodedSize / (float) maxCompressionSize;
-//			spaceSavings = (1.0f - ((float) maxCompressionSize / (float) unencodedSize)) * 100.0f;
-//			System.out.printf("Max. Fidelity file size: %d bytes\nCompression Ratio: %f\nSpace Savings: %f%%\n\n", maxCompressionSize, compressionRatio, spaceSavings);
-//
-//
-//			byte[] maxFidelityResult = maxFidelityInstance.encodeFromFile(filePath);
-//			int maxFidelitySize = maxFidelityResult.length;
-//			compressionRatio = (float) unencodedSize / (float) maxFidelitySize;
-//			spaceSavings = (1 - ((float) maxFidelitySize / (float) unencodedSize)) * 100.0f;
-//			System.out.printf("Max. Fidelity file size: %d bytes\nCompression Ratio: %f\nSpace Savings: %f%%\n\n", maxFidelitySize, compressionRatio, spaceSavings);
-//
-//		} catch (IOException | EXIException | SAXException e) {
-//			e.printStackTrace();
-//		}
-//	}
+	public static void main(String[] args) throws IOException {
+		JSONParser jsonParser = new JSONParser();
+
+		try (FileReader reader = new FileReader("src/main/resources/data_dump.json"))
+		{
+			//Read JSON file
+			Object obj = jsonParser.parse(reader);
+
+			JSONArray employeeList = (JSONArray) obj;
+			System.out.println(employeeList);
+
+			//Iterate over employee array
+			employeeList.forEach( emp -> parseEmployeeObject( (JSONObject) emp ) );
+
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+		}
+		System.out.println("hello");
+	}
+
+	private static void parseEmployeeObject(JSONObject entry)
+	{
+
+		String descricaoLog = (String) entry.get("TPLG_DSC_LOG");
+		System.out.println(descricaoLog);
+
+
+		Integer codigoLog = (Integer) entry.get("TPLG_COD_LOG");
+		System.out.println(codigoLog);
+
+		String conteudo = (String) entry.get("AUMI_DSC_CONTEUDO_ENTRADA");
+		System.out.println(conteudo);
+	}
 }
