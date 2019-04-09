@@ -4,41 +4,41 @@ import java.util.Objects;
 
 public class BenchmarkEntry {
 
-    String descricaoLog;
-    Long codigoLog;
-    String conteudo;
+    String logDescription;
+    Long logCode;
+    String content;
 
     public BenchmarkEntry() {
     }
 
     public BenchmarkEntry(String descricaoLog, Long codigoLog, String conteudo) {
-        this.descricaoLog = descricaoLog;
-        this.codigoLog = codigoLog;
-        this.conteudo = conteudo;
+        this.logDescription = descricaoLog;
+        this.logCode = codigoLog;
+        this.content = conteudo;
     }
 
-    public String getDescricaoLog() {
-        return descricaoLog;
+    public String getLogDescription() {
+        return logDescription;
     }
 
-    public void setDescricaoLog(String descricaoLog) {
-        this.descricaoLog = descricaoLog;
+    public void setLogDescription(String logDescription) {
+        this.logDescription = logDescription;
     }
 
-    public Long getCodigoLog() {
-        return codigoLog;
+    public Long getLogCode() {
+        return logCode;
     }
 
-    public void setCodigoLog(Long codigoLog) {
-        this.codigoLog = codigoLog;
+    public void setLogCode(Long logCode) {
+        this.logCode = logCode;
     }
 
-    public String getConteudo() {
-        return conteudo;
+    public String getContent() {
+        return content;
     }
 
-    public void setConteudo(String conteudo) {
-        this.conteudo = conteudo;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     @Override
@@ -46,22 +46,22 @@ public class BenchmarkEntry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BenchmarkEntry that = (BenchmarkEntry) o;
-        return Objects.equals(descricaoLog, that.descricaoLog) &&
-                Objects.equals(codigoLog, that.codigoLog) &&
-                Objects.equals(conteudo, that.conteudo);
+        return Objects.equals(logDescription, that.logDescription) &&
+                Objects.equals(logCode, that.logCode) &&
+                Objects.equals(content, that.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(descricaoLog, codigoLog, conteudo);
+        return Objects.hash(logDescription, logCode, content);
     }
 
     @Override
     public String toString() {
         return "BenchmarkEntry{" +
-                "descricaoLog='" + descricaoLog + '\'' +
-                ", codigoLog=" + codigoLog +
-                ", conteudo='" + conteudo + '\'' +
+                "logDescription='" + logDescription + '\'' +
+                ", logCode=" + logCode +
+                ", content='" + content + '\'' +
                 '}';
     }
 }
