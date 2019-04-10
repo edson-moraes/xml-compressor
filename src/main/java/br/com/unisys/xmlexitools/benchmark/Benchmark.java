@@ -3,134 +3,149 @@ package br.com.unisys.xmlexitools.benchmark;
 import br.com.unisys.xmlexitools.XmlCompressor;
 import com.siemens.ct.exi.core.exceptions.EXIException;
 import com.siemens.ct.exi.core.exceptions.UnsupportedOption;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import java.io.ByteArrayInputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Benchmark {
 
-    private static List<BenchmarkEntry> benchmarkEntries;
-    private static XmlCompressor maxFidelityInstance;
-    private static XmlCompressor maxCompressionInstance;
-    private static BenchmarkResult benchmarkResult;
+	private static List<BenchmarkEntry> benchmarkEntries;
+	private static XmlCompressor maxFidelityInstance;
+	private static XmlCompressor maxCompressionInstance;
+	private static BenchmarkResult benchmarkResult;
 
-    static {
-        JSONParser jsonParser = new JSONParser();
+	static {
+		JSONParser jsonParser = new JSONParser();
 
-        try (FileReader reader = new FileReader("src/main/resources/data_dump.json")) {
+		try (FileReader reader = new FileReader("src/main/resources/data_dump.json")) {
 
-            benchmarkEntries = new ArrayList<>();
+			benchmarkEntries = new ArrayList<>();
 
-            Object obj = jsonParser.parse(reader);
-            JSONArray employeeList = (JSONArray) obj;
-            for (Object jsonObject : employeeList) {
-                BenchmarkEntry benchmarkEntry = parseEmployeeObject((JSONObject) jsonObject);
-                if (benchmarkEntry != null) {
-                    benchmarkEntries.add(benchmarkEntry);
-                }
-            }
+			Object obj = jsonParser.parse(reader);
+			JSONArray employeeList = (JSONArray) obj;
+			for (Object jsonObject : employeeList) {
+				BenchmarkEntry benchmarkEntry = parseEmployeeObject((JSONObject) jsonObject);
+				if (benchmarkEntry != null) {
+					benchmarkEntries.add(benchmarkEntry);
+				}
+			}
 
-            maxFidelityInstance = XmlCompressor.getMaxFidelityInstance();
-            maxCompressionInstance = XmlCompressor.getMaxCompressionInstance();
+			maxFidelityInstance = XmlCompressor.getMaxFidelityInstance();
+			maxCompressionInstance = XmlCompressor.getMaxCompressionInstance();
 
-            benchmarkResult = new BenchmarkResult();
+			benchmarkResult = new BenchmarkResult();
 
-        } catch (IOException | ParseException | UnsupportedOption e) {
-            e.printStackTrace();
-        }
-    }
+		} catch (IOException | ParseException | UnsupportedOption e) {
+			e.printStackTrace();
+		}
+	}
 
-    private static BenchmarkEntry parseEmployeeObject(JSONObject entry) {
+	private static BenchmarkEntry parseEmployeeObject(JSONObject entry) {
 
-        String logDescription = (String) entry.get("TPLG_DSC_LOG");
-        Long logCode = (Long) entry.get("TPLG_COD_LOG");
-        String content = (String) entry.get("AUMI_DSC_CONTEUDO_ENTRADA");
+		String logDescription = (String) entry.get("TPLG_DSC_LOG");
+		Long logCode = (Long) entry.get("TPLG_COD_LOG");
+		String content = (String) entry.get("AUMI_DSC_CONTEUDO_ENTRADA");
 
-        if (logCode == 1L) {
-            try {
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                dBuilder.parse(new InputSource(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8))));
-            } catch (SAXException | ParserConfigurationException | IOException e) {
-                System.out.println(e.getMessage());
-                return null;
-            }
+		if (logCode <= 3L) {
+//			try {
+//                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+//                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+//                dBuilder.parse(new InputSource(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8))));
+//			} catch (SAXException | ParserConfigurationException | IOException e) {
+//				System.out.println(e.getMessage());
+//				return null;
+//			}
 
-            return new BenchmarkEntry(logDescription, logCode, content);
-        } else {
-            return null;
-        }
-    }
+			return new BenchmarkEntry(logDescription, logCode, content);
+		} else {
+			return null;
+		}
+	}
 
-    private static BenchmarkEntryResult runBenchmarkForEntry(XmlCompressor xmlCompressor, BenchmarkEntry benchmarkEntry) {
-        long uncompressedSize;
-        long compressedSize;
-        long decompressedSize;
-        long compressionTime;
-        long decompressionTime;
-        long editDistance;
+	private static BenchmarkEntryResult runBenchmarkForEntry(XmlCompressor xmlCompressor, BenchmarkEntry benchmarkEntry) {
 
-        StopWatch watch = new StopWatch();
+		long uncompressedSize;
+		long compressedSize;
+		long decompressedSize;
+		double compressionTime;
+		double decompressionTime;
+		long editDistance;
+		double gzipCompressedSize;
 
-        String conteudo = benchmarkEntry.getContent();
-        uncompressedSize = conteudo.getBytes().length;
-        try {
-            watch.start();
-            byte[] encodedData = xmlCompressor.encodeFromString(conteudo);
-            watch.stop();
-            watch.reset();
+		StopWatch watch = new StopWatch();
 
-            compressionTime = watch.getTime(TimeUnit.MILLISECONDS);
-            compressedSize = encodedData.length;
+		String conteudo = benchmarkEntry.getContent();
+		uncompressedSize = conteudo.getBytes().length;
+		try {
+			watch.start();
+			byte[] encodedData = xmlCompressor.encodeFromString(conteudo);
+			watch.stop();
 
-            watch.start();
-            String decompressedString = xmlCompressor.decodeFromByteArray(encodedData);
-            watch.stop();
-            watch.reset();
+			compressionTime = watch.getTime(TimeUnit.MICROSECONDS) / 1000.0d;
+			watch.reset();
 
-            decompressionTime = watch.getTime(TimeUnit.MILLISECONDS);
-            decompressedSize = decompressedString.getBytes(Charset.forName("ASCII")).length;
+			compressedSize = encodedData.length;
 
-            LevenshteinDistance levenshteinDistance = LevenshteinDistance.getDefaultInstance();
-            editDistance = levenshteinDistance.apply(conteudo, decompressedString);
+			watch.start();
+			String decompressedString = xmlCompressor.decodeFromByteArray(encodedData);
+			watch.stop();
 
-            return new BenchmarkEntryResult(benchmarkEntry, uncompressedSize, compressedSize, decompressedSize, compressionTime, decompressionTime, editDistance);
+			decompressionTime = watch.getTime(TimeUnit.MICROSECONDS) / 1000.0d;
+			watch.reset();
 
-        } catch (IOException | EXIException | SAXException | TransformerException e) {
-            return null;
-        }
-    }
+			ByteArrayOutputStream gzipCompressed = new ByteArrayOutputStream();
+			compressGZIP(new ByteArrayInputStream(conteudo.getBytes()), gzipCompressed);
+			gzipCompressedSize = gzipCompressed.toByteArray().length;
+
+			decompressedSize = decompressedString.getBytes(Charset.forName("ASCII")).length;
+
+			LevenshteinDistance levenshteinDistance = LevenshteinDistance.getDefaultInstance();
+			editDistance = levenshteinDistance.apply(conteudo, decompressedString);
+
+			return new BenchmarkEntryResult(benchmarkEntry, uncompressedSize, compressedSize, gzipCompressedSize, decompressedSize, compressionTime, decompressionTime, editDistance);
+
+		} catch (IOException | EXIException | SAXException | TransformerException e) {
+			return null;
+		}
+	}
+
+	public static void compressGZIP(InputStream inputStream, OutputStream outputStream) throws IOException {
+		try (GzipCompressorOutputStream out = new GzipCompressorOutputStream(outputStream)) {
+			IOUtils.copy(inputStream, out);
+		}
+	}
+
+	public static void decompressGZIP(InputStream inputStream, OutputStream outputStream) throws IOException {
+		try (GzipCompressorInputStream in = new GzipCompressorInputStream(inputStream)) {
+			IOUtils.copy(in, outputStream);
+		}
+	}
 
 
-    public static void runBenchmark() {
-        for (BenchmarkEntry be : benchmarkEntries) {
-            benchmarkResult.addBenchmarkResult(runBenchmarkForEntry(maxCompressionInstance, be));
-        }
+	public static void runBenchmark() {
+		for (BenchmarkEntry be : benchmarkEntries) {
+			benchmarkResult.addBenchmarkResult(runBenchmarkForEntry(maxCompressionInstance, be));
+		}
 
-    }
+	}
 
-    public static void main(String[] args) {
-        runBenchmark();
-        benchmarkResult.printResults();
-    }
+	public static void main(String[] args) {
+		runBenchmark();
+		benchmarkResult.printResults();
+	}
 
 }
