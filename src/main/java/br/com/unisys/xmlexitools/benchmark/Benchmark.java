@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class Benchmark {
@@ -65,14 +66,13 @@ public class Benchmark {
 		Long logCode = (Long) entry.get("TPLG_COD_LOG");
 		String content = (String) entry.get("AUMI_DSC_CONTEUDO_ENTRADA");
 
-		if (logCode <= 5L) {
+		if (logCode <= 6L) {
 			try {
 				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 				dBuilder.setErrorHandler(null);
 				dBuilder.parse(new InputSource(new ByteArrayInputStream(content.getBytes(StandardCharsets.US_ASCII))));
 			} catch (SAXException | ParserConfigurationException | IOException e) {
-				System.out.println(e.getMessage());
 				return null;
 			}
 
@@ -143,9 +143,17 @@ public class Benchmark {
 
 
 	public static void runBenchmark() {
+		BenchmarkEntry current = new BenchmarkEntry();
+		BenchmarkEntry previous;
 		for (BenchmarkEntry be : benchmarkEntries) {
+			previous = current;
+			current = be;
+			if (!Objects.equals(current.getLogCode(), previous.getLogCode())) {
+				System.out.println("Executando benchmark para " + current.getLogDescription() + " (Codigo de log: " + current.getLogCode() + ")...");
+			}
 			benchmarkResult.addBenchmarkResult(runBenchmarkForEntry(maxCompressionInstance, be));
 		}
+		System.out.println();
 
 	}
 
