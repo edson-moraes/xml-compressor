@@ -12,11 +12,16 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -60,15 +65,16 @@ public class Benchmark {
 		Long logCode = (Long) entry.get("TPLG_COD_LOG");
 		String content = (String) entry.get("AUMI_DSC_CONTEUDO_ENTRADA");
 
-		if (logCode <= 3L) {
-//			try {
-//                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-//                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-//                dBuilder.parse(new InputSource(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8))));
-//			} catch (SAXException | ParserConfigurationException | IOException e) {
-//				System.out.println(e.getMessage());
-//				return null;
-//			}
+		if (logCode <= 5L) {
+			try {
+				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+				dBuilder.setErrorHandler(null);
+				dBuilder.parse(new InputSource(new ByteArrayInputStream(content.getBytes(StandardCharsets.US_ASCII))));
+			} catch (SAXException | ParserConfigurationException | IOException e) {
+				System.out.println(e.getMessage());
+				return null;
+			}
 
 			return new BenchmarkEntry(logDescription, logCode, content);
 		} else {

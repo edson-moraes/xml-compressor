@@ -78,6 +78,7 @@ public class BenchmarkResult {
 					.toString();
 
 			System.out.println(resultString);
+			System.out.println();
 		}
 	}
 
