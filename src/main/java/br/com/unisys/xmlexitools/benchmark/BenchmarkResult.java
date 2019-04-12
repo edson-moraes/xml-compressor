@@ -34,8 +34,8 @@ public class BenchmarkResult {
 			"\\small\n" +
 			"\\centering\n" +
 			"\\begin{tabular}{l|l|l|l|l|}\n" +
-			"                                & Min.    & Max.    & Mean    & SD     \\\\ \\hline";
-	private final String TABLE_FINAL = "\\end{tabular}\n" +
+			"                                & Min.    & Max.    & Mean    & SD     \\\\ \\hline\n";
+	private final String TABLE_FINAL = "\n\\end{tabular}\n" +
 			"\\end{table}\n" +
 			"\\end{frame}";
 
@@ -156,7 +156,7 @@ public class BenchmarkResult {
 	}
 
 	public void genLatexTables() {
-		final String TABLE_ENTRY = "%s & %f & %f & %f & %f \\\\hline";
+		final String TABLE_ENTRY = "%32s & %10.3f & %10.3f & %10.3f & %10.3f \\\\ \\hline";
 
 		double meanUncompressedSize = 0.0d;
 		double meanCompressedSize = 0.0d;
@@ -194,7 +194,7 @@ public class BenchmarkResult {
 		double sdEditDistance = 0.0d;
 		double sdSpaceSaving = 0.0d;
 
-		BenchmarkEntry be = results.get(1).get(0).getBenchmarkEntry();
+		BenchmarkEntry be = results.get(1L).get(0).getBenchmarkEntry();
 		StringJoiner tablePlot = new StringJoiner("\n", String.format(TABLE_START, (be.getLogDescription() + "(Codigo Log: " + be.getLogCode() + ")")), TABLE_FINAL);
 
 		for (Long key : results.keySet()) {

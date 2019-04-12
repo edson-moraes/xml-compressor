@@ -161,6 +161,7 @@ public class Benchmark {
 		runBenchmark();
 		benchmarkResult.printResults();
 		benchmarkResult.genLatexPlots();
+		benchmarkResult.genLatexTables();
 	}
 
 }
