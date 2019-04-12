@@ -66,7 +66,7 @@ public class Benchmark {
 		Long logCode = (Long) entry.get("TPLG_COD_LOG");
 		String content = (String) entry.get("AUMI_DSC_CONTEUDO_ENTRADA");
 
-		if (logCode <= 6L) {
+		if (logCode <= 3L) {
 			try {
 				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -160,6 +160,7 @@ public class Benchmark {
 	public static void main(String[] args) {
 		runBenchmark();
 		benchmarkResult.printResults();
+		benchmarkResult.genLatexPlots();
 	}
 
 }
