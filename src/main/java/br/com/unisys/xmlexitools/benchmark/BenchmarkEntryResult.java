@@ -59,6 +59,10 @@ public class BenchmarkEntryResult {
 		return editDistance;
 	}
 
+	public double getSpaceSaving() {
+		return (1.0d - (compressedSize / uncompressedSize)) * 100.0d;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
