@@ -1,5 +1,6 @@
 package br.com.unisys.xmlexitools.benchmark;
 
+import javafx.collections.transformation.SortedList;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import java.util.*;
@@ -62,6 +63,16 @@ public class BenchmarkResult {
             List<BenchmarkEntryResult> resultList = results.get(key);
             BenchmarkEntry be = resultList.get(0).getBenchmarkEntry();
 
+            resultList.sort((o1, o2) -> {
+                if (o1.getUncompressedSize() == o2.getUncompressedSize()) {
+                    return 0;
+                } else if (o1.getUncompressedSize() > o2.getUncompressedSize()) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            });
+
             printLatexPlots(resultList, be.getLogDescription(), be.getLogCode());
             printLatexTables(resultList, be.getLogDescription(), be.getLogCode());
 
@@ -70,34 +81,33 @@ public class BenchmarkResult {
 
     public void printLatexPlots(List<BenchmarkEntryResult> resultList, String logDescription, Long logCode) {
 
-            StringJoiner latexPlot = new StringJoiner("\n\t\t\t\t", String.format(FRAME_START, (logDescription + "(Codigo Log: " + logCode + ")"), (resultList.size() + 1)), FRAME_END);
-            StringJoiner plotCordinates = new StringJoiner(" ", PLOT_CORDINATES_START, PLOT_CORDINATES_END);
+        StringJoiner latexPlot = new StringJoiner("\n\t\t\t\t", String.format(FRAME_START, (logDescription + "(Codigo Log: " + logCode + ")"), (resultList.size() + 1)), FRAME_END);
+        StringJoiner plotCordinates = new StringJoiner(" ", PLOT_CORDINATES_START, PLOT_CORDINATES_END);
 
+        List<Double> compressedSize = resultList.stream().map(BenchmarkEntryResult::getCompressedSize).collect(Collectors.toList());
+        List<Double> gzipCompressedSize = resultList.stream().map(BenchmarkEntryResult::getGzipCompressedSize).collect(Collectors.toList());
+        List<Double> uncompressedSize = resultList.stream().map(BenchmarkEntryResult::getUncompressedSize).collect(Collectors.toList());
 
-            List<Double> compressedSize = resultList.stream().map(BenchmarkEntryResult::getCompressedSize).collect(Collectors.toList());
-            List<Double> gzipCompressedSize = resultList.stream().map(BenchmarkEntryResult::getGzipCompressedSize).collect(Collectors.toList());
-            List<Double> uncompressedSize = resultList.stream().map(BenchmarkEntryResult::getUncompressedSize).collect(Collectors.toList());
+        for (int i = 0; i < compressedSize.size(); i++) {
+            plotCordinates.add("(" + (i + 1) + "," + compressedSize.get(i) + ")");
+        }
+        latexPlot.add(plotCordinates.toString());
 
-            for (int i = 0; i < compressedSize.size(); i++) {
-                plotCordinates.add("(" + (i + 1) + "," + compressedSize.get(i) + ")");
-            }
-            latexPlot.add(plotCordinates.toString());
+        plotCordinates = new StringJoiner(" ", PLOT_CORDINATES_START, PLOT_CORDINATES_END);
+        for (int i = 0; i < gzipCompressedSize.size(); i++) {
+            plotCordinates.add("(" + (i + 1) + "," + gzipCompressedSize.get(i) + ")");
+        }
+        latexPlot.add(plotCordinates.toString());
 
-            plotCordinates = new StringJoiner(" ", PLOT_CORDINATES_START, PLOT_CORDINATES_END);
-            for (int i = 0; i < gzipCompressedSize.size(); i++) {
-                plotCordinates.add("(" + (i + 1) + "," + gzipCompressedSize.get(i) + ")");
-            }
-            latexPlot.add(plotCordinates.toString());
+        plotCordinates = new StringJoiner(" ", PLOT_CORDINATES_START, PLOT_CORDINATES_END);
+        for (int i = 0; i < uncompressedSize.size(); i++) {
+            plotCordinates.add("(" + (i + 1) + "," + uncompressedSize.get(i) + ")");
+        }
+        latexPlot.add(plotCordinates.toString());
 
-            plotCordinates = new StringJoiner(" ", PLOT_CORDINATES_START, PLOT_CORDINATES_END);
-            for (int i = 0; i < uncompressedSize.size(); i++) {
-                plotCordinates.add("(" + (i + 1) + "," + uncompressedSize.get(i) + ")");
-            }
-            latexPlot.add(plotCordinates.toString());
-
-            System.out.println();
-            System.out.println(latexPlot.toString());
-            System.out.println();
+        System.out.println();
+        System.out.println(latexPlot.toString());
+        System.out.println();
 
     }
 
