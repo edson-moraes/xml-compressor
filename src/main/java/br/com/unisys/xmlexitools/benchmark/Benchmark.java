@@ -160,8 +160,7 @@ public class Benchmark {
 	public static void main(String[] args) {
 		runBenchmark();
 		benchmarkResult.printResults();
-		benchmarkResult.genLatexPlots();
-		benchmarkResult.genLatexTables();
+
 	}
 
 }
