@@ -9,21 +9,21 @@ import java.util.stream.Collectors;
 public class BenchmarkResult {
 
     private final String FRAME_START = "\\begin{frame}\n" +
-            "\t\\frametitle{\\small{%s}}\n" +
-            "\t\\begin{figure}[ht]\n" +
-            "\t\\centering\n" +
-            "\t\\resizebox {.75\\textwidth} {!} {\n" +
-            "\t\t\\begin{tikzpicture}\n" +
-            "\t\t\t\\begin{axis} [\n" +
-            "\t\t\t\t\t\t\tybar stacked, bar width=1, xmin=0, xmax=%d, ymin= 0,\n" +
-            "\t\t\t\t\t\t\tylabel=Tamanho(bytes), scaled y ticks = false, \n" +
-            "\t\t\t\t\t\t\tlegend style={area legend, at={(0.5,-0.15)}, anchor=north, legend columns=-1 } \n" +
-            "\t\t\t\t\t\t ]\n\t\t\t\t";
+            "\\frametitle{\\small{%s}}\n" +
+            "\\begin{figure}[ht]\n" +
+            "\\centering\n" +
+            "\\resizebox {.75\\textwidth} {!} {\n" +
+            "\\begin{tikzpicture}\n" +
+            "\\begin{axis} [\n" +
+            "ybar stacked, bar width=1, xmin=0, xmax=%d, ymin= 0,\n" +
+            "ylabel=Size(bytes), scaled y ticks = false, xticklabels={,,}, tick pos=left,\n" +
+            "legend style={area legend, at={(0.5,-0.15)}, anchor=north, legend columns=-1 }\n" +
+            "]\n";
 
-    private final String FRAME_END = "\n\t\t\t\t\\legend{EXI, GZIP, Uncompressed}\n\t\t\t\\end{axis}\n" +
-            "\t\t\\end{tikzpicture}\n" +
-            "\t}\n" +
-            "\t\\end{figure}\n" +
+    private final String FRAME_END = "\n\\legend{EXI, GZIP, Uncompressed}\n\\end{axis}\n" +
+            "\\end{tikzpicture}\n" +
+            "}\n" +
+            "\\end{figure}\n" +
             "\\end{frame}\n";
 
     private final String PLOT_CORDINATES_START = "\\addplot coordinates {";
@@ -81,7 +81,7 @@ public class BenchmarkResult {
 
     public void printLatexPlots(List<BenchmarkEntryResult> resultList, String logDescription, Long logCode) {
 
-        StringJoiner latexPlot = new StringJoiner("\n\t\t\t\t", String.format(FRAME_START, (logDescription + "(Codigo Log: " + logCode + ")"), (resultList.size() + 1)), FRAME_END);
+        StringJoiner latexPlot = new StringJoiner("\n", String.format(FRAME_START, (logDescription + "(Codigo Log: " + logCode + ")"), (resultList.size() + 1)), FRAME_END);
         StringJoiner plotCordinates = new StringJoiner(" ", PLOT_CORDINATES_START, PLOT_CORDINATES_END);
 
         List<Double> compressedSize = resultList.stream().map(BenchmarkEntryResult::getCompressedSize).collect(Collectors.toList());
